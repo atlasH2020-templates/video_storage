@@ -1,0 +1,311 @@
+openapi: 3.0.1
+
+info:
+  title: Video Storage Service
+  description: ATLAS service to store and distribute automated video recordings
+  contact:
+    email: mark.hoffmann@iais.fraunhofer.de
+  version: 0.1.1
+
+servers:
+- url: https://sensorsystems.iais.fraunhofer.de/video-storage
+- url: http://localhost:5000
+
+tags:
+- name: list_videos
+  description: '***mandatory*** endpoint'
+- name: get_video
+  description: '***mandatory*** endpoint'
+- name: download_video
+  description: '***mandatory*** endpoint'
+- name: subscribe
+  description: optional endpoint
+- name: unsubscribe
+  description: optional endpoint
+- name: list_subscriptions
+  description: optional endpoint
+
+paths:
+  /videos:
+    get:
+      tags:
+      - list_videos
+      summary: List available videos
+      operationId: getVideos
+      parameters:
+      - name: client_id
+        required: true
+        in: query
+        schema:
+          type: string
+      - name: client_name
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+          description: List of videos available
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/videos'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: No videos found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /videos/{id}:
+    get:
+      tags:
+      - get_video
+      summary: Retrieve information on a specific video.
+      operationId: getVideo
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The requested video
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /download/{id}:
+    get:
+      tags:
+      - download_video
+      summary: Download a specific video.
+      operationId: downloadVideo
+      parameters:
+      - name: id
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        200:
+          description: The video file
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video_file'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        404:
+          description: Video not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+                
+  /callback:
+    get:
+      tags:
+      - list_subscriptions
+      summary: list the current subscriptions
+      operationId: getSubscriptions
+      parameters:
+      - name: client_id
+        required: true
+        in: query
+        schema:
+          type: string
+      - name: client_name
+        required: false
+        in: query
+        schema:
+          type: string
+      responses:
+        200:
+            description: List of current Subscriptions
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/subscription'
+    post:
+      tags:
+      - subscribe
+      summary: register a notification url, that will be invoked when a new video is available for download
+      operationId: subscribe
+      requestBody:
+        description: Video Subscription parameters
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+              - client_id
+              - notification_url
+              properties:
+                client_id:
+                  type: string
+                notification_url:
+                  type: string
+                  description: |-
+                    'Unguessable' url to a client's POST endpoint that is able to handle notifications. Notifications in the form of the video schema.
+                    
+                        id: string
+                        client_id: string
+                        filename: string
+                        suffix: string
+                        timestamp: '2020-12-09T21:17:37.850Z'
+                        
+      responses:
+        '200':
+          description: successful operation
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/subscription'
+        '400':
+          description: Bad parameters
+    delete:
+      tags: 
+      - unsubscribe
+      summary: cancel a previously created subscription
+      operationId: unsubscribe
+      parameters:
+        - description: the id of a subscription
+          name: id
+          in: query
+          required: true
+          schema:
+            type: string
+            format: string
+      responses:
+        '204':
+          description: successful operation
+        '401':
+          description: Invalid or missing credentials
+      
+      
+                
+  /upload:
+    get:
+      tags:
+      - internal
+      summary: Get help for video upload endpoint
+      operationId: uploadHelp
+      responses:
+        200:
+          description: Help for video uploading
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/help'
+    post:
+      tags:
+      - internal
+      summary: Upload a video file
+      operationId: uploadVideo
+      security:
+      - InternalAuth: []
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/video_file'
+      responses:
+        200:
+          description: Video upload successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/video'
+        400:
+          description: Invalid request
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        401:
+          description: Not authorized
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+components:
+  securitySchemes:
+    InternalAuth:
+      type: http
+      scheme: basic
+  schemas:
+    video:
+      type: object
+      properties:
+        id:
+          type: string
+        client_id:
+          type: string
+        filename:
+          type: string
+        suffix:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+    videos:
+      type: object
+      properties:
+        videos:
+          type: array
+          items:
+            $ref: '#/components/schemas/video'
+    video_file:
+      type: object
+      properties:
+        video:
+          type: string
+          format: binary
+    subscription:
+      type: object
+      properties:
+        id:
+          type: string
+        camera_ids::
+          type: array
+          items:
+            type: string
+        notification_url:
+          type: string
+    error:
+      type: object
+      properties:
+        error:
+          type: string
+    help:
+      type: object
+      properties:
+        help:
+          type: string
