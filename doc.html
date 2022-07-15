@@ -20,11 +20,8 @@ Author(s)                          Mark Hoffmann (Fraunhofer IAIS)
 <div style="margin-left: -22px;">
 
 <h1>Abstract</h1>
-The purpose of this service template specifications document is to provide a technologyagnostic
-overview of the video storage service template. It describes a well-defined baseline of the service by clearly identifying 
-the service version. The document describes the shared functional aspects of any service instance implementing
-the media storage template, the operational and business context of such services, possible
-requirements, relations to other services and validation aspects.
+This document describes the specifications for a general video storage service whose purpose is to provide a filtered access to a list of videos from a cloud storage and provide the ability to download them.
+
 </div>
 
 <h2>Intended audience</h2>
@@ -45,12 +42,9 @@ Additionally, services are required to provide information about a recorded vide
     <li>Type of recording (video or audio file)</li>
 </ul>
 <h2>Operational Context</h2>
-The video storage service allows authenticated service consumers to access video recordings
-via their id, to view all available recordings for a user, or to filter by sensor ID. It allows for
-registration of a callback URL via API call. Doing so will have the video storage service send
-a notification whenever a new video is available for download. Consumers can then
-download the video per GET request, using the video ID they received as part of the
-notification.
+The video storage service allows authenticated service consumers to access video recordings via their id, to view all available recordings for a user, or to filter by sensor ID. It allows for
+registration of a callback URL via API call. Doing so will have the video storage service send a notification whenever a new video is available for download. Consumers can then
+download the video per GET request, using the video ID they received as part of the notification.
 <img src="doc/operational_context.png" style="width: 420px" />
 <h2>Service template API</h2>
 This section provides an abstract overview of the service template API. The detailed
