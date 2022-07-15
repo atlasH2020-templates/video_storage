@@ -1,0 +1,132 @@
+<html>
+<head>
+    <style type="text/css">
+        body { font-family: courier, courier new, monospace; font-size:12px; margin-left: 42px; width: 465px; white-space: pre-line; }
+        h2 { margin: 10px 0 0 -22px; font-size:12px; padding: 0 !important }
+        table { font-size: 10px; margin-left: -22px; width: 450px; }
+        div.header { padding: 0; margin: 0 0 0 -22px; white-space: pre-wrap; }
+    </style>
+</head>
+<body>
+
+<div class="header">
+ATLAS Service Template Specification
+Name                                                video_storage
+Version                                                       0.2
+Author(s)                          Mark Hoffmann (Fraunhofer IAIS)
+</div>
+
+<h2>The "video_storage" ATLAS Service Template</h2>
+<div style="margin-left: -22px;">
+
+<h1>Abstract</h1>
+The purpose of this service template specifications document is to provide a technologyagnostic
+overview of the video storage service template. It describes a well-defined baseline of the service by clearly identifying 
+the service version. The document describes the shared functional aspects of any service instance implementing
+the media storage template, the operational and business context of such services, possible
+requirements, relations to other services and validation aspects.
+</div>
+
+<h2>Intended audience</h2>
+ATLAS software vendors, participants, who want to to provide an ATLAS livestock monitoring service instance, or who wish to consume ATLAS livestock monitoring service instances.
+
+
+<h2>Functional overview</h2>
+Services implementing the video storage service template will provide a way to list and
+download recorded video data recordings.
+<ul>
+    <li> Video Files </li>
+</ul>
+
+Additionally, services are required to provide information about a recorded video on request.
+<ul>
+    <li>Exact time and date of recording.</li>
+    <li>ID of the sensor (e.g. video camera)</li>
+    <li>Type of recording (video or audio file)</li>
+</ul>
+<h2>Operational Context</h2>
+The video storage service allows authenticated service consumers to access video recordings
+via their id, to view all available recordings for a user, or to filter by sensor ID. It allows for
+registration of a callback URL via API call. Doing so will have the video storage service send
+a notification whenever a new video is available for download. Consumers can then
+download the video per GET request, using the video ID they received as part of the
+notification.
+<img src="doc/operational_context.png" style="width: 420px" />
+<h2>Service template API</h2>
+This section provides an abstract overview of the service template API. The detailed
+OpenAPI specifications can be found in the service registry.
+<h4>Endpoints</h4>
+<h4>list_videos</h4>
+Inputs:
+<ul>
+<li>Sensor ID (optional)</li>
+</ul>
+Outputs:
+<ul>
+list of available videos with
+<li>video ID</li>
+<li>sensor ID</li>
+<li>record timestamp</li>
+<li>file type</li>
+</ul>
+<h4>get_video</h4>
+Inputs:
+<ul>
+    <li>video ID</li>
+</ul>
+Outputs:
+<ul>
+    <li>sensor ID</li>
+    <li>record timestamp</li>
+    <li>file type</li>
+</ul>
+<h4>download_video</h4>
+Inputs:
+<ul>
+    <li>video ID</li>
+</ul>
+Outputs:
+<ul>
+    <li>the file</li>
+</ul>
+<h4>subscribe</h4>
+Inputs:
+<ul>
+    <li>callback url</li>
+    <li>sensor ID(s) (optional)</li>
+</ul>
+Outputs:
+<ul>
+ <li>subscription ID</li>
+</ul>
+Notifications send to the callback URL are of the form:
+<ul>
+    <li>video ID</li>
+    <li>sensor ID</li>
+    <li>record timestamp</li>
+    <li>file type</li>
+</ul>
+<h4>unsubscribe</h4>
+Inputs:
+<ul>
+    <li>subscription ID</li>
+</ul>
+Outputs:
+<ul>
+<li>none</li>
+</ul>
+<h4>list_subscriptions</h4>
+Inputs:
+<ul>
+<li>none</li>
+</ul>
+Outputs:
+<ul>
+lists all subscriptions with
+    <li>subscription id</li>
+    <li>callback URL</li>
+</ul>
+<h2>Data model</h2>
+The detailed data models, with examples can be found in the adjoining OpenAPI specifications.
+</body>
+</html>
