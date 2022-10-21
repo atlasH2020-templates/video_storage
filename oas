@@ -3,13 +3,15 @@ openapi: 3.0.1
 info:
   title: Video Storage Service
   description: ATLAS service to store and distribute automated video recordings
-  contact:
-    email: mark.hoffmann@iais.fraunhofer.de
-  version: 0.1.1
+  version: 0.1.2
+
+externalDocs:
+  description: Service Template Document
+  url: "https://htmlpreview.github.io/?https://github.com/atlasH2020-templates/video_storage/blob/v0.1.2/doc.html"
 
 servers:
-- url: https://sensorsystems.iais.fraunhofer.de/video-storage
-- url: http://localhost:5000
+- url: "https://sensorsystems.iais.fraunhofer.de/video-storage"
+- url: "http://localhost:5000"
 
 tags:
 - name: list_videos
@@ -55,13 +57,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
         404:
           description: No videos found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
   /videos/{id}:
     get:
       tags:
@@ -86,13 +88,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
         404:
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
                 
   /download/{id}:
     get:
@@ -118,13 +120,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
         404:
           description: Video not found
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
                 
   /callback:
     get:
@@ -145,13 +147,13 @@ paths:
           type: string
       responses:
         200:
-            description: List of current Subscriptions
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/subscription'
+          description: List of current Subscriptions
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/subscription'
     post:
       tags:
       - subscribe
@@ -201,7 +203,6 @@ paths:
           required: true
           schema:
             type: string
-            format: string
       responses:
         '204':
           description: successful operation
@@ -247,13 +248,13 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
         401:
           description: Not authorized
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/error'
+                $ref: '#/components/schemas/DetailedError'
 
 components:
   securitySchemes:
@@ -299,13 +300,35 @@ components:
             type: string
         notification_url:
           type: string
-    error:
-      type: object
-      properties:
-        error:
-          type: string
+
     help:
       type: object
       properties:
         help:
           type: string
+
+    DetailedError:
+      type: object
+      description: This defines the structure of an error payload when one is present. Actual messages and additional error information content may change from one implementation to another
+      properties:
+        message:
+          type: string
+          description: error description
+        status:
+            type: string
+            description: http error code
+        error_url:
+          type: string
+          format: uri
+          description: "A service's proprietary UI url where the user may navigate to view additional information or be prompted for additional actions to deal with the error. A well-behaved FMIS will present his users with a visual indication and the means to click on this link when this attribute is present."
+        errors:
+          type: array
+          items:
+            type: string
+          description: Additional detailed information
+      required:
+        - message
+      example:
+        message: this is a sample error message
+        errors:
+          - this is an example of additional error information
